@@ -57,8 +57,8 @@ const PROGRAM = {
     deficit: 0.20, proteinPerLb: 1.0, fatPerLb: 0.35, fiber: 30
   },
   proteinIdeas: [
-    ["Whey scoop", 25], ["Greek yogurt cup", 23], ["Chicken 6 oz", 50], ["Egg whites cup", 26],
-    ["93% beef 5 oz", 32], ["Tuna can", 27], ["Cottage cheese cup", 26], ["Shrimp 6 oz", 40]
+    ["Whey scoop", 25], ["Greek yogurt cup", 23], ["Soya chunks 50g", 26], ["Tofu 200g", 34],
+    ["Dal 1 cup", 18], ["Paneer 100g", 20], ["Tempeh 100g", 20], ["Chickpeas 1 cup", 15]
   ],
   tips: [
     "Weigh daily, judge weekly. Only the 7-day average matters.",
@@ -66,14 +66,14 @@ const PROGRAM = {
     "Side delts grow fastest with frequent, high-rep, strict sets.",
     "Pull with your elbows, not your hands, to feel your lats.",
     "Hold your strength on a cut and you keep the muscle.",
-    "Build every meal around protein, then veg, then carbs.",
+    "Build every meal around protein: dairy, soya, tofu or dal. Then veg, then carbs.",
     "Ab wheel and hanging leg raises progress better than crunches.",
     "Abs show from low body fat, not extra ab reps.",
     "Hungry? Drink water, eat high-volume veg, wait 15 minutes.",
     "Put your carbs around training for better sessions.",
     "Steps drive most fat loss. Walk after meals.",
     "Same weight for more reps is still progress. Log every set.",
-    "Same bedtime and wake time every day. Cool, dark room.",
+    "Take B12, vitamin D and 5 g creatine daily. Vegetarians benefit most.",
     "One off-plan meal is a blip. Get straight back on plan."
   ]
 };
