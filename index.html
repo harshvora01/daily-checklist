@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f8a5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Checklist">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Daily Fitness Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box}html{padding-block:env(safe-area-inset-top,0) env(safe-area-inset-bottom,0)}body{margin:0}
+/* Layout: phone-first column — progress ring + streak header, 14-day strip, then three grouped checklists */
+:root{
+  --bg:#f2f4f3; --surface:#ffffff; --fg:#17201d; --muted:#5f6b67; --line:#dde3e0;
+  --accent:#1f8a5b; --water:#2f7fd1; --protein:#c27a1a; --flame:#e0592a; --done-bg:#e7f3ec;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Barlow",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --surface:#18201d; --fg:#e8eeeb; --muted:#93a19c; --line:#2a3531;
+  --accent:#3fbf86; --water:#5aa2ee; --protein:#e3a24a; --flame:#ff7a45; --done-bg:#1a2c24; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --surface:#18201d; --fg:#e8eeeb; --muted:#93a19c; --line:#2a3531;
+  --accent:#3fbf86; --water:#5aa2ee; --protein:#e3a24a; --flame:#ff7a45; --done-bg:#1a2c24; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:center;gap:18px}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+h1{margin:0;font-family:var(--display);font-size:30px;font-weight:700;line-height:1.05;text-wrap:balance}
+.date{color:var(--muted);font-size:14px;margin-top:4px}
+.count{font-size:14px;margin-top:2px;font-variant-numeric:tabular-nums}
+.streak{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.stats{display:flex;gap:24px;align-items:flex-end}
+.stat b{display:block;font-family:var(--display);font-size:38px;line-height:1;font-variant-numeric:tabular-nums}
+.stat.cur b{color:var(--flame)}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.days{display:grid;grid-template-columns:repeat(14,1fr);gap:4px}
+.day{aspect-ratio:1;max-width:100%;border-radius:5px;background:var(--line);position:relative}
+.day.full{background:var(--accent)}
+.day.part{background:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.day.today{outline:2px solid var(--fg);outline-offset:1px}
+.legend{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+section{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sh h2{margin:0;font-family:var(--display);font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.sh span{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:4px;background:var(--line)}
+.bar i{display:block;height:100%;width:0;background:var(--c);transition:width .25s}
+label{display:flex;align-items:center;gap:14px;padding:13px 16px;border-top:1px solid var(--line);cursor:pointer;user-select:none}
+label:first-of-type{border-top:0}
+input{position:absolute;opacity:0;pointer-events:none}
+.box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;transition:.15s}
+.box svg{opacity:0;stroke:#fff}
+input:checked+.box{background:var(--c);border-color:var(--c)}
+input:checked+.box svg{opacity:1}
+input:checked~.t{color:var(--muted);text-decoration:line-through}
+input:focus-visible+.box{outline:2px solid var(--c);outline-offset:2px}
+label:has(input:checked){background:var(--done-bg)}
+.t{font-weight:500}
+.g-train{--c:var(--accent)} .g-water{--c:var(--water)} .g-protein{--c:var(--protein)}
+#groups{display:flex;flex-direction:column;gap:16px}
+.note{text-align:center;color:var(--muted);font-size:13px}
+.done{display:none;text-align:center;font-family:var(--display);font-size:22px;font-weight:700;color:var(--accent)}
+.all .done{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head><body>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="ring">
+      <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="var(--line)" stroke-width="9"/><circle id="arc" cx="48" cy="48" r="40" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="251.3" style="transition:stroke-dashoffset .3s"/></svg>
+      <div class="pct" id="pct">0%</div>
+    </div>
+    <div>
+      <h1>Today's Checklist</h1>
+      <div class="date" id="date"></div>
+      <div class="count" id="count"></div>
+    </div>
+  </header>
+
+  <div class="streak">
+    <div class="stats">
+      <div class="stat cur"><b id="cur">0</b><span>🔥 Day streak</span></div>
+      <div class="stat"><b id="best">0</b><span>Best</span></div>
+      <div class="stat"><b id="totalDays">0</b><span>Perfect days</span></div>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="legend"><span>14 days ago</span><span>Today</span></div>
+  </div>
+
+  <div class="done">All done today 💪 Streak secured</div>
+  <div id="groups"></div>
+  <div class="note" id="note">Resets at midnight. Finish all items to keep your streak. Saved on this device.</div>
+</div>
+
+<script>
+const GROUPS=[
+  {id:"train",name:"Training",items:["Workout","Cardio","50 ab crunches","30 leg raises","No sugar"]},
+  {id:"water",name:"Water",items:Array.from({length:8},(_,i)=>`Glass ${i+1}`)},
+  {id:"protein",name:"Protein",items:["Protein smoothie 1","Protein smoothie 2"]}
+];
+const TOTAL=GROUPS.reduce((n,g)=>n+g.items.length,0);
+const tick='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+
+let today=keyOf(new Date());
+let history={};          // {"YYYY-MM-DD": {checks:{}, done:n}}
+let dbRef=null, uid=null, writeChain=Promise.resolve(), writeTimer=null, pending=false;
+
+/* ---- local fallback ---- */
+function loadLocal(){try{history=JSON.parse(localStorage.getItem("fit-history"))||{}}catch(e){history={}}}
+function saveLocal(){try{localStorage.setItem("fit-history",JSON.stringify(history))}catch(e){}}
+
+const todayChecks=()=>(history[today]&&history[today].checks)||{};
+
+function renderList(){
+  const c=todayChecks();
+  document.getElementById("date").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  document.getElementById("groups").innerHTML=GROUPS.map(g=>`
+    <section class="g-${g.id}">
+      <div class="sh"><h2>${g.name}</h2><span id="c-${g.id}"></span></div>
+      <div class="bar"><i id="b-${g.id}"></i></div>
+      ${g.items.map((t,i)=>{const id=`${g.id}-${i}`;return `<label for="${id}"><input type="checkbox" id="${id}" ${c[id]?"checked":""}><span class="box">${tick}</span><span class="t">${t}</span></label>`}).join("")}
+    </section>`).join("");
+  update();
+}
+
+function update(){
+  const c=todayChecks(); let done=0;
+  GROUPS.forEach(g=>{const n=g.items.length,d=g.items.filter((_,i)=>c[`${g.id}-${i}`]).length;done+=d;
+    document.getElementById("c-"+g.id).textContent=`${d}/${n}`;document.getElementById("b-"+g.id).style.width=(d/n*100)+"%"});
+  document.getElementById("pct").textContent=Math.round(done/TOTAL*100)+"%";
+  document.getElementById("count").textContent=`${done} of ${TOTAL} done`;
+  document.getElementById("arc").style.strokeDashoffset=251.3*(1-done/TOTAL);
+  document.getElementById("app").classList.toggle("all",done===TOTAL);
+  renderStreak();
+}
+
+const isFull=k=>history[k]&&history[k].done>=TOTAL;
+
+function renderStreak(){
+  const now=new Date();
+  // current streak: today counts if complete; otherwise start from yesterday
+  let d=isFull(today)?now:addDays(now,-1), cur=0;
+  while(isFull(keyOf(d))){cur++;d=addDays(d,-1)}
+  // best streak + perfect days
+  const keys=Object.keys(history).filter(isFull).sort();
+  let best=0,run=0,prev=null;
+  keys.forEach(k=>{run=(prev&&keyOf(addDays(new Date(prev+"T12:00"),1))===k)?run+1:1;best=Math.max(best,run);prev=k});
+  document.getElementById("cur").textContent=cur;
+  document.getElementById("best").textContent=Math.max(best,cur);
+  document.getElementById("totalDays").textContent=keys.length;
+  let html="";
+  for(let i=13;i>=0;i--){const k=keyOf(addDays(now,-i)),h=history[k];
+    const cls=isFull(k)?"full":(h&&h.done>0?"part":"");
+    html+=`<div class="day ${cls} ${i===0?"today":""}" title="${k}: ${h?h.done:0}/${TOTAL}"></div>`}
+  document.getElementById("days").innerHTML=html;
+}
+
+function persist(){
+  saveLocal();
+  if(!dbRef) return;
+  clearTimeout(writeTimer); pending=true;
+  writeTimer=setTimeout(()=>{
+    const k=today, body={checks:{...todayChecks()},done:(history[k]||{}).done||0,total:TOTAL};
+    writeChain=writeChain.then(()=>dbRef.doc(k).set(body)).catch(()=>{}).finally(()=>{pending=false});
+  },500);
+}
+
+document.addEventListener("change",e=>{
+  if(e.target.type!=="checkbox")return;
+  const h=history[today]||(history[today]={checks:{},done:0});
+  h.checks={...h.checks,[e.target.id]:e.target.checked};
+  h.done=Object.values(h.checks).filter(Boolean).length;
+  update(); persist();
+});
+
+function checkDay(){const k=keyOf(new Date());if(k!==today){today=k;renderList()}}
+document.addEventListener("visibilitychange",checkDay);
+setInterval(checkDay,60000);
+
+loadLocal(); renderList();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+
+</script>
+
+</body></html>
